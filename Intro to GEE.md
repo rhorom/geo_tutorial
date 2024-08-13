@@ -1,6 +1,6 @@
 
 # Short Introduction to Google Earth Engine
-**Rhorom Priyatikanto**<br>
+[**Rhorom Priyatikanto**](mailto:rp1y21@soton.ac.uk)<br>
 WorldPop - University of Southampton
 
 ## Pre-requisites
@@ -139,12 +139,43 @@ GEE provides a robust set of tools and functionalities for vector analysis, enab
     - Vector-Based Machine Learning: Apply machine learning algorithms to vector data for classification, regression, or clustering tasks.
 
 ## Data visualisation
+GEE allows users to create informative and visually appealing maps, charts, and other graphics. Here's an overview of the types of data visualization you can do in GEE:
+
+- **Image Visualization**:
+    - RGB Composites: Combine multiple spectral bands (e.g., red, green, blue) to create natural color or false-color composite images.
+    - Color Palettes: Apply different color palettes to highlight specific features or ranges of values in raster data.
+    - Histograms: Visualize the distribution of pixel values in an image.
+    - Scatter Plots: Explore relationships between different bands or indices.
+    - Time Series Animation: Create animations to visualize changes in image data over time.
+- **Vector Visualization**:
+    - Point, Line, and Polygon Rendering: Display vector data as points, lines, or polygons with customizable colors, sizes, and styles.
+    - Add labels to vector features for easy identification.
+    - Display density or intensity of point data as a heatmap.
+- **Interactive Mapping**:
+    - Layer Control: Add and remove layers to the map interactively.
+    - Zoom and Pan: Explore data at different scales and locations.
+    - Pop-up Information: Display attribute information or charts when clicking on features.
+    - Time Slider: Visualize changes in data over time using a time slider.
+- **Charting**:
+    - Line Charts: Plot time series data or changes in values over a spatial dimension.
+    - Bar Charts: Compare values across categories or regions.
+    - Scatter Plots: Visualize relationships between two variables.
+    - Histograms: Show the distribution of values in a dataset.
+    - Pie Charts: Display proportions of different categories.
+- **Exporting Visualizations**:
+    - Images: Export maps and charts as image files (e.g., PNG, JPEG).
+    - Videos: Export time series animations as video files (e.g., MP4).
 
 ## Common workflow
-### Data acquisition
-
-### Processing
-
-### Visualisation
-
-### Exporting
+1. Data Acquisition and Preprocessing:
+    - Image/ImageCollection Selection: Identify the appropriate raster datasets (satellite imagery, elevation models, land cover data, etc.) from the [Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets/). Uploading data into assets can also be another alternative to get the data ready for further processes.
+    - Filtering: Filter images based on specific criteria like date range, cloud cover, or sensor type.
+    - Region of Interest (ROI) Definition: Define the geographic area of interest using geometries (points, lines, polygons).
+    - Image Preprocessing: Perform operations like masking clouds, atmospheric correction, or topographic normalization to prepare the data for analysis.
+    - Band Math/Indices Calculation: Compute new bands or indices using mathematical expressions on existing bands (e.g., NDVI, EVI).
+    - Image Mosaicking/Compositing: Combine multiple overlapping images to create a seamless image or a composite representing the best pixels from a collection.
+2. Processing and Analysis: This step is very dependent on the objectives of the job.
+3. Post-processing and Visualization:
+    - Map Visualization: Display results on an interactive map using different color palettes, styles, or layer combinations.
+    - Charting: Create charts or graphs to visualize time series data, histograms, or other statistical summaries.
+    - Export: Export results as GeoTIFFs, tables, or other formats for further analysis or sharing.
