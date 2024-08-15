@@ -1,4 +1,5 @@
-# Population Data Analysis using Google Earth Engine
+
+# Exploring Gridded Population Datasets
 [**Rhorom Priyatikanto**](mailto:rp1y21@soton.ac.uk)<br>
 WorldPop - University of Southampton
 
@@ -7,15 +8,16 @@ WorldPop - University of Southampton
 2. Basic knowledge on the Google Earth Engine
 2. Basic understanding in GIS concepts, including raster and vector data processing and analysis
 
-## Table of Contents
+## Table of contents
 1. [Main courses](#main-courses)
 2. [Introduction to gridded population data](#introduction)
 3. [Gridded population data in GEE](#gridded-population-data-in-gee)
 4. [Additional data: administrative boundary](#additional-data-administrative-boundary)
 5. [Visualisation 1: map](#visualisation-1-map)
 6. [Zonal statistics](#zonal-statistics)
-7. [Visualisation 2: scater plot]()
-8. [Computing some statistics]()
+7. [Visualisation 2: scatter plot](#visualisation-2-scatter-plot)
+8. [Data export](#data-export)
+9. [Computing some statistics](#computing-some-statistics)
 
 ## Main courses
 - Visualising gridded population data
@@ -53,7 +55,7 @@ In GEE we can easily find several gridded population datasets, e.g., by typing '
 
 The datasets listed above are stored in GEE either as `Image` or `ImageCollection`. We can acquire the datasets using the following commands:
 
-```
+```javascript
 //Importing gridded population data
 var wpgp = ee.ImageCollection("WorldPop/GP/100m/pop")
   .filterDate('2020-01-01','2020-12-31');
@@ -64,7 +66,7 @@ var landscan = ee.ImageCollection("projects/sat-io/open-datasets/ORNL/LANDSCAN_G
 var ghsl = ee.Image("projects/sat-io/open-datasets/GHS/GHS_POP/GHS_POP_E2020_GLOBE_R2023A_54009_100_V1_0");
 ```
 At this stage, `wpgp` and `landscan` are both `FeatureCollection` while `ghsl` is and `Image`. To overview the contents a variable, use `print()` function and check what is printed in the Console.
-```
+```javascript
 print(wpgp);
 /*
 ImageCollection WorldPop/GP/100m/pop (249 elements)
@@ -97,11 +99,11 @@ Image projects/sat-io/open-datasets/GHS/GHS_POP/GHS_POP_E2020_GLOBE_R2023A_54009
 For `ImageCollection`, filtering can be conducted based on the property recorded in the collection. Generally, we can use `filter()` method for this task while `filterDate()` is a specific method for filtering based on the date or timestamp. The `filter()` requires an `Filter` class as the input whereas `filterDate()` needs start-date and end-date as inputs. The dates can also be expressed as *milliseconds since 1970-01-01T00:00Z*.
 
 To be more annotative, the following command
-```
+```javascript
 var wpgp_2020 = wpgp.filterDate('2020-01-01', '2020-12-31')
 ```
 gives the same result as
-```
+```javascript
 var wpgp_2020 = wpgp.filter(ee.Filter.date(1577836800000, 1609372800000))
 ```
 
@@ -129,7 +131,7 @@ Originally, `nga_adm2_pop_2020` contains more than 60 columns but we only select
 
 ## Visualisation 1: map
 As a quick look, we create a map displaying the population count at admin-2 level based on the Nigeria data we just uploaded.
-```
+```javascript
 var empty = ee.Image(1).float();
 Map.centerObject(adm2, 6);
 Map.addLayer(empty, {min:0, max:1, palette:['white','white']}, 'bg');
@@ -141,7 +143,7 @@ The above commands center the map view at the region of interest (a).
 
 We can create a choropleth based on the total population count at admin-2 level and add it to the map (b). This can be done by rasterising the `FeatureCollection` into an `Image` and then transforming the population count into a selected color palette.
 
-```
+```javascript
 var empty = ee.Image(1).float();
 var choropleth = empty.paint({
   featureCollection: adm2,
@@ -151,7 +153,7 @@ Map.addLayer(choropleth, {min:0, max:1e6, palette:['white', 'blue', 'darkblue']}
 ```
 
 Getting back to the gridded population data we have imported, we need to filter the collection based on the defined region of interest. This step will make the overall process more efficient. The `filterBounds()` method from the `ImageCollection` class can be used for this purpose. As the input, this function requires `Geometry` or `Feature` containing geometry.
-```
+```javascript
 wpgp = wpgp.filterBounds(adm2).mosaic().clip(adm2);
 landscan = landscan.filterBounds(adm2).first().clip(adm2);
 ghsl = ghsl.clip(adm2);
@@ -159,7 +161,7 @@ ghsl = ghsl.clip(adm2);
 Additional to the filtering, mosaicing of multiple image tiles from `wpgp` dataset transforms `ImageCollection` into an `Image`. Meanwhile, the `first()` method is implemented to select the first image in the `landscan` collection. How the data is stored in the collection determines the way we get the image/raster data from it.
 
 At this stage, all gridded datasets are in the form of `Image`. We can stack all images into a multiband image for easier analysis. All bands in an `Image` do not have to share the same scale and projection.
-```
+```javascript
 var stack = wpgp.rename('pop_wpgp')
   .addBands(landscan.rename('pop_landscan'))
   .addBands(ghsl.rename('pop_ghsl'));
@@ -167,7 +169,7 @@ var stack = wpgp.rename('pop_wpgp')
 
 Visualisation of the raster data is a straightforward process. Nevertheless, `pop_landscan` layer needs to be multiplied by `0.01` so it can match with the visualisation parameters defined in `vis`. This minor adjustment is required as `pop_landscan` has a spatial resolution of 1000 m while the other bands (`pop_wpgp` and `pop_ghsl`) are at 100 m.
 
-```
+```javascript
 var nSteps = 7;
 var palettes = require('users/gena/packages:palettes');
 var palette = palettes.matplotlib.viridis[nSteps];
@@ -183,9 +185,9 @@ Map.addLayer(stack.select('pop_ghsl'), vis, 'GHSL');
 ## Zonal statistics
 Visually, the difference between gridded datasets is perceivable though further quantitative analysis can be conducted to assess their compatibility. We will aggregate the gridded data to admin-2 level so that comparison can be done, including the comparison between gridded datasets and the census data summarised at administrative units. To simplify the case, the population table obtained from the Humanitarian Data Exchange is assumed to be the census data. The following commands do the aggregation.
 
-```
+```javascript
 //Performing zonal statistics: computing total population count at admin-2 level
-var agg = wpgp.reduceRegions({
+var agg = stack.reduceRegions({
   reducer: ee.Reducer.sum(),
   collection: adm2,
   scale: 100
@@ -193,7 +195,7 @@ var agg = wpgp.reduceRegions({
 ```
 
 Again, the count from the LandScan dataset requires adjustment as the aggregation is done at 100-m scale. Extra variables can also be computed in the same iteration.
-```
+```javascript
 //Adding some important variables to the FeatureCollection
 agg = agg.map(function(feat){
   var area = feat.area().multiply(1e-6);
@@ -225,5 +227,102 @@ Some explanations on the commands above:
     - `area`: area of the administrative unit in square kilometer
     - `pop_landscan`: the original value is multiplied by `0.01`
     - `dens_wpgp`: population density in persons per square kilometer
-    - `dev_wpgp`, `dev_landscan`, `dev_ghsl`: deviation between population count from gridded data and the 'census data'.
+    - `dev_wpgp`, `dev_landscan`, `dev_ghsl`: deviation between population count from gridded data and the 'census data'
 
+As a quick look, printing `agg` gives the following output:
+```javascript
+FeatureCollection (773 elements, 8 columns)
+type: FeatureCollection
+columns: Object (8 properties)
+  area: Number
+  dens_wpgp: Number
+  dev_ghsl: Number
+  dev_landscan: Number
+  dev_wpgp: Number
+  pop_ghsl: Float
+  pop_landscan: Number
+  pop_wpgp: Float
+features: List (773 elements)
+```
+
+## Visualisation 2: scatter plot
+The tabular data we just produced can be visualised in many ways. In the context of comparing different datasets, creating a scatter plot can be a starting point. This task can be done using `ui.Chart` functions to produce [Google Charts](https://developers.google.com/chart/interactive/docs/gallery). 
+
+Among three major branches of the `ui.Chart`, we can use `ui.Chart.feature` to visualise the data stored in a `FeatureCollection`. As we are interested in comparing population count at administrative level, then `ui.Chart.feature.byFeature()` becomes the best function to select. In one plot, population count from HDX is set as the x-value while the counts from three different datasets are used as the y-values.
+
+```javascript
+var chart = ui.Chart.feature.byFeature({
+  features: agg,
+  xProperty: 'T_TL',
+  yProperties: ['pop_wpgp', 'pop_ghsl', 'pop_landscan']
+});
+```
+Options and styling can be added to the chart.
+```javascript
+var series = {
+  0: {pointSize:5, lineWidth:0, pointShape: 'circle', color:'blue'},
+  1: {pointSize:5, lineWidth:0, pointShape: 'circle', color:'green'},
+  2: {pointSize:5, lineWidth:0, pointShape: 'circle', color:'red'},
+};
+var style = {
+  hAxis: {title: 'HDX Data', scaleType:'log'},
+  vAxis: {title: 'Gridded Dataset', scaleType:'log'},
+  series: series
+};
+chart = chart.setOptions(style);
+```
+Finally, the chart can be displayed in the console by printing the `chart` variable. The chart in the console can be opened in a new tab by clicking an 'expand' button on the upper-right corner of the chart. As a Google Charts, there are three download options available: the underlying table in CSV and the chart in SVG or PNG. To be noted that the CSV file exported in this way contains only the columns/properties called in the chart. The remaining columns like `area` and `dens_wpgp` are not included in the CSV.
+
+![](fig/pop_scatter_1.PNG)
+
+## Data export
+Exporting the tabular data in a complete form may be of interest. For this purpose, we use the `Export.table` function in the GEE. The data can be exported as `GeoJSON` (or CSV) to the Google Drive to enable downloading and further usage.
+
+```javascript
+Export.table.toDrive({
+  collection: agg,
+  description: 'dataset_comparison',
+  folder: 'gee',
+  fileFormat: 'GeoJSON'
+});
+```
+
+## Computing some statistics
+At glance, the scatter plot shows that the gridded population data overestimates the HDX population count. This applies for all three datasets we called. Some statistics or scores can be computed to quantify the difference between the gridded datasets ($x$) and the HDX ($x_0$).
+- bias: $\frac{1}{n}\sum(x-x_0)$
+- mean absolute percentace error (mape): $\frac{1}{n}\sum{\frac{|x-x_0|}{x_0}}$
+- root mean square error (rmse): $\sqrt{\frac{1}{n}\sum{(x-x_0)^2}}$
+
+Departing from the tabular data we have, the scores for each dataset can be computed as follows:
+```javascript
+var x0 = ee.Array(agg.aggregate_array('T_TL'));
+var stat = ee.List(['dev_wpgp', 'dev_landscan', 'dev_ghsl']).map(function(dataset){
+  var dev = agg.aggregate_array(dataset);
+  var bias = dev.reduce({reducer:ee.Reducer.mean()});
+  var mse = dev.map(function(x){return ee.Number(x).pow(2)}).reduce({reducer:ee.Reducer.mean()});
+  var rmse = ee.Number(mse).sqrt();
+  var mape = ee.Array(dev).abs().divide(x0).toList()
+    .reduce({reducer:ee.Reducer.mean()});
+  return ee.Dictionary({'dataset':dataset, 'bias':bias, 'rmse':rmse, 'mape':mape});
+});
+```
+
+Printing the `stat` gives the following output:
+```javascript
+List (3 elements)
+  0: Object (4 properties)
+    bias: -23789.360154415674
+    dataset: dev_wpgp
+    mape: 0.2257592886991155
+    rmse: 117528.25878981325
+  1: Object (4 properties)
+    bias: -27198.43086634706
+    dataset: dev_landscan
+    mape: 0.2001161769145638
+    rmse: 103998.44255658734
+  2: Object (4 properties)
+    bias: 7869.00632713849
+    dataset: dev_ghsl
+    mape: 0.27855326696701754
+    rmse: 132843.50551330028
+```

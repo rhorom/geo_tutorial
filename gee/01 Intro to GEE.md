@@ -8,15 +8,15 @@ WorldPop - University of Southampton
 2. Basic skill in _Javascript_ programming language
 3. Basic understanding in GIS concepts, including raster and vector data processing and analysis
 
-## Table of Contents
+## Table of contents
 1. [What is Google Earth Engine](#what-is-google-earth-engine)
 2. [Getting started](#getting-started)
 3. [Entities in GEE](#entities-in-gee)
 4. [Functionalities in GEE](#functionalities-in-gee)
-5. [Common workflow](#common-workflow)
-6. [Raster analysis](#raster-analysis)
-7. [Vector analysis](#vector-analysis)
-8. [Data visualisation](#data-visualisation)
+5. [Raster analysis](#raster-analysis)
+6. [Vector analysis](#vector-analysis)
+7. [Data visualisation](#data-visualisation)
+8. [Common workflow](#common-workflow)
 
 ## What is Google Earth Engine
 [Google Earth Engine](https://earthengine.google.com), or GEE in short, is a powerful cloud-based geospatial analysis platform developed by Google. It provides researchers, scientists, and developers with access to a vast repository of satellite imagery, geospatial datasets, and computational resources, enabling them to analyze and visualise changes on the Earth's surface at a planetary scale.
@@ -56,7 +56,7 @@ You can then access the GEE Code Editor at: https://code.earthengine.google.com/
     - Docs: Access to the GEE documentation and API reference.
     - Assets: To manage your uploaded data and scripts.
 
-    ![Ini](/fig/gee-code-editor.PNG "GEE code editor")
+    ![Ini](/fig/gee_code_editor.PNG)
 
 5. Begin writing your own Javascript to analyze and visualize data.
 6. Utilize the [Earth Engine API reference](https://developers.google.com/earth-engine/api_docs) to discover available functions and classes. The Docs tab on the left panel of the Code Editor can also be helpful.
@@ -68,12 +68,17 @@ Google GEE primarily stores and provides access to two main types of geospatial 
     - Satellite Imagery: GEE hosts a vast collection of satellite imagery from various sensors and platforms, including Landsat, Sentinel, MODIS, and many others. This imagery covers a wide range of spectral bands and resolutions, enabling diverse applications from land cover classification to change detection. `Image` data type represents a single raster data that contains one or more bands. Each band has its own name, data type, scale, mask, and projection.
     - Image Collections: GEE organises related images, such as a time series of satellite imagery, into Image Collections. An `ImageCollection` may contain multiple `Image` with different spatial extent or sequence of `Image` with distinguished timestamps. We can filter images in the collection using some methods.
     - Other Raster Data: In addition to satellite imagery, GEE also stores other raster datasets like digital elevation models (DEMs), land surface temperature data, and various thematic maps.
+
+    ![](fig/gee_raster.PNG)
+
 - **Vector Data (Features)**:
     - Geometry: A set of coordinates define a `Geometry`. Type of geometries supported by GEE, include points, lines, and polygons. GEE also supports multi-point, multi-linestring, and multi-polygon geometries.
     - Feature: A collection of data attached with geospatial information can be describe as `Feature` data type in GEE. Basically, it is a `Geometry` with data added to it.
     - Feature Collections: GEE allows you to work with vector data in the form of `FeatureCollection`. These collections can represent geometries and each feature can have associated attributes.
     - Shapefiles and GeoJSON: You can import your own vector data in formats like shapefiles or GeoJSON into GEE for analysis and integration with other datasets.
     - Table Data: GEE can also handle tabular data, which can be linked to vector features or used independently for analysis.
+
+    ![](fig/gee_vector.PNG)
 
 Other fundamental data structures in GEE include `Dictionary`, `List`, `Array`, `Date`, `Number` and `String`. These data structures are the same as in Javascript language, but they are handled differently on the server-side.
 
@@ -151,6 +156,9 @@ GEE allows users to create informative and visually appealing maps, charts, and 
     - Point, Line, and Polygon Rendering: Display vector data as points, lines, or polygons with customizable colors, sizes, and styles.
     - Add labels to vector features for easy identification.
     - Display density or intensity of point data as a heatmap.
+
+    ![](fig/nga_adm2.PNG)
+
 - **Interactive Mapping**:
     - Layer Control: Add and remove layers to the map interactively.
     - Zoom and Pan: Explore data at different scales and locations.
